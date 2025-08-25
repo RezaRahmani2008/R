@@ -28,6 +28,11 @@ jobs:
         Invoke-WebRequest https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-windows-amd64.zip -OutFile ngrok.zip
         Expand-Archive ngrok.zip -DestinationPath $env:GITHUB_WORKSPACE
 
+- name: Test Ngrok Secret
+  shell: pwsh
+  run: |
+    Write-Host "Secret test: $env:NGROK_AUTH_TOKEN"
+
     - name: Configure Ngrok Auth
       shell: pwsh
       run: |
