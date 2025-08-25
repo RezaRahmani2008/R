@@ -1,0 +1,31 @@
+name: Windows 2022 RDP
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-2022
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Download Ngrok (Official)
+      run: |
+        Invoke-WebRequest https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-windows-amd64.zip -OutFile ngrok.zip
+        Expand-Archive ngrok.zip -DestinationPath $env:GITHUB_WORKSPACE
+
+    - name: Configure Ngrok Auth
+      run: |
+        .\ngrok.exe authtoken $env:NGROK_AUTH_TOKEN
+
+    - name: Start RDP Tunnel
+      run: |
+        Start-Process -NoNewWindow -FilePath .\ngrok.exe -ArgumentList "tcp 3389" 
+        Start-Sleep -Seconds 10
+        $tunnels = .\ngrok.exe api tunnels | ConvertFrom-Json
+        $public_url = $tunnels.tunnels[0].public_url
+        $user = "Administrator"
+        $password = "Password123!"  # در صورت امکان رمز را امن تغییر بده
+        Write-Output "RDP INFO LOGIN:`nIP: $public_url`nUser: $user`nPassword: $password"
