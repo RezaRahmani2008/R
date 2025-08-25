@@ -12,14 +12,13 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Test Ngrok Secret
-      shell: pwsh
-      run: |
-        if (-not $env:NGROK_AUTH_TOKEN) { 
-            Write-Error "NGROK_AUTH_TOKEN is empty! Please add it in Settings > Secrets."
-            exit 1
-        } else {
-            Write-Host "NGROK_AUTH_TOKEN is set."
-        }
+  shell: pwsh
+  run: |
+    Write-Host "Secret test: $env:NGROK_AUTH_TOKEN"
+    if (-not $env:NGROK_AUTH_TOKEN) { 
+        Write-Error "NGROK_AUTH_TOKEN is empty! Please add it in Settings > Secrets."
+        exit 1
+    }
 
     - name: Download Ngrok (Official)
       shell: pwsh
