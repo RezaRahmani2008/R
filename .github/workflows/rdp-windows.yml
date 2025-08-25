@@ -11,21 +11,41 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
+    - name: Test Ngrok Secret
+      shell: pwsh
+      run: |
+        if (-not $env:NGROK_AUTH_TOKEN) { 
+            Write-Error "NGROK_AUTH_TOKEN is empty! Please add it in Settings > Secrets."
+            exit 1
+        } else {
+            Write-Host "NGROK_AUTH_TOKEN is set."
+        }
+
     - name: Download Ngrok (Official)
+      shell: pwsh
       run: |
         Invoke-WebRequest https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-windows-amd64.zip -OutFile ngrok.zip
         Expand-Archive ngrok.zip -DestinationPath $env:GITHUB_WORKSPACE
 
     - name: Configure Ngrok Auth
+      shell: pwsh
       run: |
         .\ngrok.exe authtoken $env:NGROK_AUTH_TOKEN
 
-    - name: Start RDP Tunnel
+    - name: Generate Random Password
+      id: password
+      shell: pwsh
       run: |
-        Start-Process -NoNewWindow -FilePath .\ngrok.exe -ArgumentList "tcp 3389" 
+        $pass = [System.Web.Security.Membership]::GeneratePassword(12,2)
+        echo "::set-output name=RDP_PASSWORD::$pass"
+
+    - name: Start RDP Tunnel
+      shell: pwsh
+      run: |
+        Start-Process -NoNewWindow -FilePath .\ngrok.exe -ArgumentList "tcp 3389"
         Start-Sleep -Seconds 10
         $tunnels = .\ngrok.exe api tunnels | ConvertFrom-Json
         $public_url = $tunnels.tunnels[0].public_url
         $user = "Administrator"
-        $password = "Password123!"  # در صورت امکان رمز را امن تغییر بده
-        Write-Output "RDP INFO LOGIN:`nIP: $public_url`nUser: $user`nPassword: $password"
+        $password = "${{ steps.password.outputs.RDP_PASSWORD }}"
+        Write-Host "RDP INFO LOGIN:`nIP: $public_url`nUser: $user`nPassword: $password"
