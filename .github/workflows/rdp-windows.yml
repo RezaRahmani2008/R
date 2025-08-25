@@ -12,13 +12,15 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Test Ngrok Secret
-  shell: pwsh
-  run: |
-    Write-Host "Secret test: $env:NGROK_AUTH_TOKEN"
-    if (-not $env:NGROK_AUTH_TOKEN) { 
-        Write-Error "NGROK_AUTH_TOKEN is empty! Please add it in Settings > Secrets."
-        exit 1
-    }
+      shell: pwsh
+      run: |
+        Write-Host "Testing NGROK_AUTH_TOKEN secret..."
+        if (-not $env:NGROK_AUTH_TOKEN) { 
+            Write-Error "NGROK_AUTH_TOKEN is empty! Please add it in Settings > Secrets of your Fork."
+            exit 1
+        } else {
+            Write-Host "NGROK_AUTH_TOKEN is set correctly."
+        }
 
     - name: Download Ngrok (Official)
       shell: pwsh
@@ -47,4 +49,4 @@ jobs:
         $public_url = $tunnels.tunnels[0].public_url
         $user = "Administrator"
         $password = "${{ steps.password.outputs.RDP_PASSWORD }}"
-        Write-Host "RDP INFO LOGIN:`nIP: $public_url`nUser: $user`nPassword: $password"
+        Write-Host "✅ RDP INFO LOGIN:`nIP: $public_url`nUser: $user`nPassword: $password"
